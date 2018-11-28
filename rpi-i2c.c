@@ -133,7 +133,7 @@ int get_data_length() {
  */
 
 void set_slave_address(int address) {
-    i2c_reg[I2C_SLAVE_ADDRESS] ^= address; 
+    i2c_reg[I2C_SLAVE_ADDRESS] = address; 
 }
 
 int get_slave_address() {
