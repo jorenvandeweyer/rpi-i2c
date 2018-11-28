@@ -1,8 +1,6 @@
 #ifndef RPI_I2C_H
 #define RPI_I2C_H
 
-#include "defines.h"
-
 static volatile unsigned int* i2c_reg;
 
 /**

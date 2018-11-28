@@ -1,4 +1,6 @@
 #include "rpi-i2c.h"
+#include "defines.h"
+
 /**
  * Control register
 */
@@ -119,7 +121,7 @@ void reset_status_register() {
  */
 
 void set_data_length(int num) {
-    i2c_reg[I2C_DLEN] ^= num;
+    i2c_reg[I2C_DLEN] = num;
 }
 
 int get_data_length() {
@@ -147,7 +149,7 @@ int get_FIFO_data() {
 }
 
 void set_FIFO_data(int data) {
-    i2c_reg[DATA_FIFO] ^= data;
+    i2c_reg[DATA_FIFO] = data;
 }
 
 /**
@@ -234,7 +236,6 @@ void write_bytes(int address, int *byte, unsigned int no_bytes) {
     clear_FIFO_data();
 
     set_data_length(no_bytes+1);
-    set_FIFO_data(0xEE);
     for (int i = 0; i<no_bytes; i++) {
         set_FIFO_data(byte[i]);
     }

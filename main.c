@@ -9,10 +9,10 @@ interrupt-driven device driver for the Raspberry Pi 1 Model b+.
 #include "rpi-uart.h"
 #include "rpi-i2c.h"
 
-#define GY_521 0x68
+#define VL53L0X_I2C_ADDRESS 0x68
 
-const int TX_PIN = 14;
-const int RX_PIN = 15;
+const int TX_pin = 14;
+const int RX_pin = 15;
 
 const int SDA_pin = 2;
 const int SCL_pin = 3;
@@ -20,9 +20,9 @@ const int SCL_pin = 3;
 void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags )
 {
 	gpio_init();
-	set_GPIO_alterfunc(&gpio[TX_PIN], 4);
-	set_GPIO_alterfunc(&gpio[RX_PIN], 4);
-
+	set_GPIO_alterfunc(&gpio[TX_pin], 4);
+	set_GPIO_alterfunc(&gpio[RX_pin], 4);
+	
 	set_GPIO_alterfunc(&gpio[SDA_pin], 4);
 	set_GPIO_alterfunc(&gpio[SCL_pin], 4);
 
@@ -36,14 +36,20 @@ void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags )
 
 	i2c_init();
 
-	int *bytes = {0x3, 0x8, 0xF};
-
-	write_bytes(GY_521, &bytes, 3);
-
 	char line[128];
-	while(1){
-		uprintf("Enter a line from UARTS\n\r");
-		ugets(&uart, line);
-		uprintf("%s\n", line);
-	}
+
+
+	int *bytes = {0x33, 0x88, 0xF0};
+
+	write_bytes(VL53L0X_I2C_ADDRESS, &bytes, 3);
+
+	/**while(1){
+		uprintf("Reading from ToF sensor...\n\r");
+		char bytes[10];
+		char *byte;
+		//read_bytes(VL53L0X_I2C_ADDRESS, 1, &bytes);
+		read_byte(VL53L0X_I2C_ADDRESS, &byte);
+		uprintf(byte);
+		uprintf("\n\r");
+	}*/
 }

@@ -53,11 +53,11 @@ add_executable( ${NAME}
     defines.h
     rpi-gpio.c
     rpi-gpio.h
-    rpi-i2c.c
-    rpi-i2c.h
     rpi-interrupts.c
     rpi-interrupts.h
-    rpi-uart.c )
+    rpi-uart.c
+    rpi-i2c.c
+    rpi-i2c.h )
 
 add_custom_command(
     TARGET ${NAME} POST_BUILD
