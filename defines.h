@@ -86,6 +86,17 @@ typedef unsigned int   u32;
 #define MIS   0x40
 #define SBUFSIZE 128
 
+// I2C
+#define I2C_BASE 0x20804000
+#define I2C_CONTROL 0
+#define I2C_STATUS 1
+#define I2C_DLEN 2
+#define I2C_SLAVE_ADDRESS 3
+#define DATA_FIFO 4
+#define CLOCK_DIVIDER 5
+#define DATA_DELAY 6
+#define CLOCK_STRETCH_TIMEOUT 7
+
 // Interrupt register
 #define IRQ2 0x85
 
