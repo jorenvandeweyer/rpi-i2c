@@ -1,5 +1,6 @@
 #include "rpi-i2c.h"
 #include "defines.h"
+#include "rpi-uart.h"
 
 /**
  * Control register
@@ -235,8 +236,8 @@ void write_bytes(int address, int *byte, unsigned int no_bytes) {
     reset_status_register();
     clear_FIFO_data();
 
-    set_data_length(no_bytes+1);
-    for (int i = 0; i<no_bytes; i++) {
+    set_data_length(no_bytes);
+    for (int i = 0; i<no_bytes; i++) { // moet dit niet +1?
         set_FIFO_data(byte[i]);
     }
     set_slave_address(address);

@@ -20,6 +20,10 @@ const int SCL_pin = 3;
 void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags )
 {
 	gpio_init();
+
+	set_GPIO_pullup(&gpio[SDA_pin]);
+	set_GPIO_pullup(&gpio[SCL_pin]);
+
 	set_GPIO_alterfunc(&gpio[TX_pin], 4);
 	set_GPIO_alterfunc(&gpio[RX_pin], 4);
 	
@@ -39,9 +43,9 @@ void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags )
 	char line[128];
 
 
-	int *bytes = {0x33, 0x88, 0xF0};
+	unsigned int bytes[] = {0x33, 0x88, 0xF0, 0x33};
 
-	write_bytes(VL53L0X_I2C_ADDRESS, &bytes, 3);
+	write_bytes(VL53L0X_I2C_ADDRESS, &bytes, 4);
 
 	/**while(1){
 		uprintf("Reading from ToF sensor...\n\r");

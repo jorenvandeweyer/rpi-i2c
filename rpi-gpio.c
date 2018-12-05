@@ -9,6 +9,26 @@ more functionality.
 ********************************************************************/
 #include "rpi-gpio.h"
 
+void set_GPIO_pullup(GPIO *up) {
+    gpio_reg[GPIO_GPPUD] = 0b10;
+    int i;
+    for (i = 0; i<150; i++);
+    gpio_reg[GPIO_GPPUDCLK0] = (1 << up->gpio_bit);
+    for (i = 0; i<150; i++);
+    gpio_reg[GPIO_GPPUD] = 0;
+    gpio_reg[GPIO_GPPUDCLK0] = (0 << up->gpio_bit);
+}
+
+void clear_GPIO_pullup_down() {
+    gpio_reg[GPIO_GPPUD] = 0b00;
+    int i;
+    for (i = 0; i<150; i++);
+    gpio_reg[GPIO_GPPUDCLK0] = -1;
+    for (i = 0; i<150; i++);
+    gpio_reg[GPIO_GPPUDCLK0] = 0;
+    gpio_reg[GPIO_GPPUD] = 0b00;
+}
+
 /** @brief GPIO initialization. For each gpio the correct registers are stored 
 		   in variables declaired in the gpio struct */
 void gpio_init(){
@@ -41,6 +61,8 @@ void gpio_init(){
 			default: break;
 		}
 	}
+
+	clear_GPIO_pullup_down();
 }
 
 /** @brief Alter the gpio its functionality to an alternate function */
