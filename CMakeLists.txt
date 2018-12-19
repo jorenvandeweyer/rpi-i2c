@@ -55,9 +55,14 @@ add_executable( ${NAME}
     rpi-gpio.h
     rpi-interrupts.c
     rpi-interrupts.h
+    rpi-timer.c
+    rpi-timer.h
     rpi-uart.c
+    rpi-uart.h
     rpi-i2c.c
-    rpi-i2c.h )
+    rpi-i2c.h 
+    L3G4200D.c
+    L3G4200D.h )
 
 add_custom_command(
     TARGET ${NAME} POST_BUILD

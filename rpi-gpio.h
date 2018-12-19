@@ -32,6 +32,7 @@ typedef volatile struct gpio{
 GPIO gpio[27];
 
 extern void gpio_init();
+extern void set_GPIO_pullup(GPIO *up);
 extern void set_GPIO_alterfunc(GPIO *up, int n);
 extern void set_GPIO_output(GPIO *up);
 extern void set_GPIO_input(GPIO *up);

@@ -53,13 +53,6 @@ extern void set_slave_address(int address);
 extern int get_slave_address();
 
 /**
- * Data FIFO register
- */
-
-extern int get_FIFO_data();
-extern void set_FIFO_data(int data);
-
-/**
  * Clock divider register
  */
 
@@ -83,9 +76,18 @@ extern void set_clock_stretch_timeout(int timeout);
 extern int get_clock_stretch_timeout();
 
 /**
+ * Data FIFO register
+ */
+
+int read_byte_from_FIFO();
+void write_bytes_to_FIFO(unsigned int *, unsigned int);
+int read_status_reg();
+
+/**
  *
  */
 
-extern int read_bytes(int address, int no_bytes, char *bytes);
+void read_bytes(unsigned int, unsigned int *, unsigned int);
+void write_bytes(unsigned int, unsigned int *, unsigned int);
 
 #endif

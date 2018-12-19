@@ -48,7 +48,7 @@ void clear_FIFO_data() {
 }
 
 void set_read_transfer() {
-    i2c_reg[I2C_CONTROL] |= 1;
+    i2c_reg[I2C_CONTROL] |= (1 << 0);
 }
 
 void set_write_transfer() {
@@ -68,7 +68,7 @@ void reset_CLKT() {
 }
 
 int is_ERR() {
-    return (i2c_reg[I2C_STATUS] >> 8) & 1;
+    return (i2c_reg[I2C_STATUS] & I2C_S_ERR);
 }
 
 void reset_ERR() {
@@ -95,12 +95,16 @@ int does_RX_need_reading() {
     return (i2c_reg[I2C_STATUS] >> 3) & 1;
 }
 
+//checked
 int does_TX_need_writing() {
-    return (i2c_reg[I2C_STATUS] >> 2) & 1;
+    // return (i2c_reg[I2C_STATUS] >> 2) & 1;
+    return i2c_reg[I2C_STATUS] & (1 << 2);
 }
 
+//checked
 int is_transfer_done() {
-    return (i2c_reg[I2C_STATUS] >> 1) & 1;
+    // return (i2c_reg[I2C_STATUS] >> 1) & 1;
+    return i2c_reg[I2C_STATUS] & (1 << 1); 
 }
 
 void reset_transfer_done() {
@@ -198,49 +202,81 @@ int get_clock_stretch_timeout() {
 }
 
 /**
- *
+ * Data FIFO register
  */
 
-int read_bytes(int address, int no_bytes, char *bytes) {
+int read_byte_from_FIFO() {
+    return (i2c_reg[DATA_FIFO] & 0xFF);
+}
+
+void write_bytes_to_FIFO(unsigned int *bytes, unsigned int no_bytes) {
+    unsigned int i;
+    for (i=0; i<no_bytes && i<16; i++) {
+        i2c_reg[DATA_FIFO] = (*(bytes+i) & 0xFF);
+        // uprintf("Writing %x\n\r", *(bytes+i) & 0xFF);
+    }
+}
+
+int read_status_reg() {
+    return i2c_reg[I2C_STATUS];
+}
+
+void read_bytes(unsigned int address, unsigned int *bytes, unsigned int no_bytes) {
+    reset_status_register();
+    clear_FIFO_data();
+
     set_slave_address(address);
     set_data_length(no_bytes);
     set_read_transfer();
-    //enable_int_DONE();
     start_transfer();
-
-    int i = 0;
 
     while (!is_transfer_done()) {
-        while (does_RX_contain_DATA()) {
-            bytes[i] = get_FIFO_data();
-            i++;
+        // Check if the FIFO is full but not all the data has been transmitted
+        if (does_RX_need_reading()) {
+            unsigned int i;
+            for (i=0; i<16; i++) {
+                *bytes = read_byte_from_FIFO();
+                bytes++;
+                no_bytes--;
+            }
+        } 
+        else if (is_ERR()) {
+            //NACK received
+            break;
         }
-    } 
-}
-
-int read_byte(int address, char *byte) {
-    reset_status_register();
-    clear_FIFO_data();
-
-    set_slave_address(address);
-    set_data_length(1);
-    set_FIFO_data(0xEE);
-    set_read_transfer();
-    
-    start_transfer();
-    while(!is_transfer_active());
-    *byte = get_FIFO_data();
-}
-
-void write_bytes(int address, int *byte, unsigned int no_bytes) {
-    reset_status_register();
-    clear_FIFO_data();
-
-    set_data_length(no_bytes);
-    for (int i = 0; i<no_bytes; i++) { // moet dit niet +1?
-        set_FIFO_data(byte[i]);
     }
+
+    //read remaining data in the fifo
+    unsigned int i;
+    for (i=0; i<no_bytes; i++) {
+        *bytes = read_byte_from_FIFO();
+        bytes++;
+    }
+}
+
+void write_bytes(unsigned int address, unsigned int *bytes, unsigned int no_bytes) {
+    reset_status_register();
+    clear_FIFO_data();
+
     set_slave_address(address);
+    
+    write_bytes_to_FIFO(bytes, no_bytes);    
+    
+    set_data_length(no_bytes);
+
     set_write_transfer();
     start_transfer();   
+
+    while(!is_transfer_done()) {
+        // check if the FIFO is empty but not all the data has been transmitted
+        if (does_TX_need_writing) {
+            no_bytes -= 16;
+            bytes += 16;
+            write_bytes_to_FIFO(bytes, no_bytes);
+        }
+        else if (is_ERR()) {
+            //NACK
+            break;
+        }
+    }
 }
