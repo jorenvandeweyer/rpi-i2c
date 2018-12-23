@@ -2,6 +2,8 @@
 #define L3G4200D_h
 
 #include "rpi-i2c.h"
+#include "rpi-timer.h"
+#include "rpi-uart.h"
 #include <stdint.h>
 
 #define L3G4200D_ADDRESS           (0xD2 >> 1)
@@ -67,6 +69,24 @@ struct Vector {
     short z;
 };
 
+struct Vector_Short {
+    short x;
+    short y;
+    short z;
+};
+
+struct Vector_Int {
+    int x;
+    int y;
+    int z;
+};
+
+struct Vector_Float {
+    float x;
+    float y;
+    float z;
+};
+
 int L3G4200D_begin(l3g4200d_dps_t scale, l3g4200d_odrbw_t odrbw);
 l3g4200d_dps_t L3G4200D_getScale();
 l3g4200d_odrbw_t L3G4200D_getOdrBw();
@@ -76,7 +96,7 @@ void L3G4200D_setThreshold(unsigned int multiple);
 void L3G4200D_writeRegister(unsigned int reg, unsigned int value);
 unsigned int L3G4200D_readRegister(unsigned int reg);
 unsigned int L3G4200D_fastRegister(unsigned int reg);
-struct Vector L3G4200D_readRaw();
-struct Vector L3G4200D_readNormalize();
+struct Vector_Short L3G4200D_readRaw();
+struct Vector_Float L3G4200D_readNormalize();
 
 #endif

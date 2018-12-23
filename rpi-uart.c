@@ -138,14 +138,13 @@ int uprintx(UART *up, int x)
   uputc(up, ' ');
 }
 
-int urpu(UART *up, int x)
-{
+int urpu(UART *up, int x) {
   char c;
-  if (x){
-     c = tab[x % 10];
-     urpu(up, x / 10);
+  c = tab[x % 10];
+  if (x > 9) {
+    urpu(up, x / 10);
   }
-  uputc(up, c);
+  return uputc(up, c);
 }
 
 int uprintu(UART *up, int x)
@@ -154,7 +153,6 @@ int uprintu(UART *up, int x)
     uputc(up, '0');
   else
     urpu(up, x);
-  uputc(up, ' ');
 }
 
 int uprinti(UART *up, int x)
@@ -177,7 +175,7 @@ int ufprintf(UART *up, char *fmt,...)
     if (*cp != '%'){
       uputc(up, *cp);
       if (*cp=='\n')
-	uputc(up, '\r');
+	      uputc(up, '\r');
       cp++;
       continue;
     }
@@ -193,8 +191,7 @@ int ufprintf(UART *up, char *fmt,...)
   }
 }
 
-int uprintf(char *fmt, ...)
-{
+int uprintf(char *fmt, ...) {
   int *ip;
   char *cp;
   cp = fmt;
@@ -202,11 +199,11 @@ int uprintf(char *fmt, ...)
 
   UART *up = &uart;
 
-  while(*cp){
-    if (*cp != '%'){
+  while(*cp) {
+    if (*cp != '%') {
       uputc(up, *cp);
       if (*cp=='\n')
-	uputc(up, '\r');
+	      uputc(up, '\r');
       cp++;
       continue;
     }

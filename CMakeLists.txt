@@ -62,7 +62,9 @@ add_executable( ${NAME}
     rpi-i2c.c
     rpi-i2c.h 
     L3G4200D.c
-    L3G4200D.h )
+    L3G4200D.h
+    gyroscope.c
+    gyroscope.h )
 
 add_custom_command(
     TARGET ${NAME} POST_BUILD

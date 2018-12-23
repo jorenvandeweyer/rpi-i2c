@@ -11,3 +11,6 @@ typedef struct {
 } rpi_system_timer;
 
 void delay_us(unsigned int us);
+void delay_ms(unsigned int ms);
+unsigned int get_time_us();
+unsigned int get_time_ms();

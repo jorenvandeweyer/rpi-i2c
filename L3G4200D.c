@@ -1,17 +1,17 @@
 #include "L3G4200D.h"
 #include <stdio.h>
 #include <math.h>
-struct Vector d;
-struct Vector t;
-struct Vector r;
-struct Vector n;
+struct Vector_Float d;
+struct Vector_Float t;
+struct Vector_Short r;
+struct Vector_Float n;
 
 unsigned int useCalibrate;
 unsigned int actualThreshold;
-int dpsPerDigit;
-int thresholdX;
-int thresholdY;
-int thresholdZ;
+float dpsPerDigit;
+float thresholdX;
+float thresholdY;
+float thresholdZ;
 
 int L3G4200D_begin(l3g4200d_dps_t scale, l3g4200d_odrbw_t odrbw) {
     d.x = 0;
@@ -39,13 +39,13 @@ int L3G4200D_begin(l3g4200d_dps_t scale, l3g4200d_odrbw_t odrbw) {
 
     switch (scale) {
         case L3G4200D_SCALE_250DPS:
-            dpsPerDigit = .00875f;
+            dpsPerDigit = .00875f; //114.28
             break;
         case L3G4200D_SCALE_500DPS:
-            dpsPerDigit = .0175f;
+            dpsPerDigit = .0175f; //57.14
             break;
         case L3G4200D_SCALE_2000DPS:
-            dpsPerDigit = .07f;
+            dpsPerDigit = .07f; //14.28
             break;
         default:
             break;
@@ -77,15 +77,21 @@ l3g4200d_odrbw_t L3G4200D_getOdrBw() {
 void L3G4200D_calibrate(unsigned int samples) {
     useCalibrate = 1;
 
-    int sumX = 0;
-    int sumY = 0;
-    int sumZ = 0;
-    int sigmaX = 0;
-    int sigmaY = 0;
-    int sigmaZ = 0;
+    float sumX = 0;
+    float sumY = 0;
+    float sumZ = 0;
+    float sigmaX = 0;
+    float sigmaY = 0;
+    float sigmaZ = 0;
+
+    for (unsigned int i = 3; i > 0; i--) {
+        uprintf("calibrating in: %d seconds, please hold still\n\r", i);
+        delay_ms(1000);
+    }
 
     for (unsigned int i = 0; i < samples; i++) {
         L3G4200D_readRaw();
+
         sumX += r.x;
         sumY += r.y;
         sumZ += r.z;
@@ -94,8 +100,7 @@ void L3G4200D_calibrate(unsigned int samples) {
         sigmaY += r.y * r.y;
         sigmaZ += r.z * r.z;
 
-        volatile unsigned int tim;
-        for (tim = 0; tim<10000;tim++);
+        delay_ms(20);
     }
 
     d.x = sumX / samples;
@@ -103,8 +108,10 @@ void L3G4200D_calibrate(unsigned int samples) {
     d.z = sumZ / samples;
 
     thresholdX = ((sigmaX / samples) - (d.x * d.x));
-    thresholdX = ((sigmaX / samples) - (d.x * d.x));
-    thresholdX = ((sigmaX / samples) - (d.x * d.x));
+    thresholdY = ((sigmaY / samples) - (d.y * d.y));
+    thresholdZ = ((sigmaZ / samples) - (d.z * d.z));
+
+    uprintf("thresholdX %d\n\r", (int) thresholdX);
 
     if (actualThreshold > 0) {
         L3G4200D_setThreshold(actualThreshold);
@@ -120,12 +127,15 @@ unsigned int L3G4200D_getThreshold() {
 void L3G4200D_setThreshold(unsigned int multiple) {
     if (multiple > 0) {
         if (!useCalibrate) {
-            L3G4200D_calibrate(100);
+            uprintf("calibrating in set threshold\n\r");
+            L3G4200D_calibrate(40);
         }
 
-        t.x = thresholdX * multiple;
-        t.y = thresholdY * multiple;
-        t.z = thresholdZ * multiple;
+        t.x = thresholdX * multiple*multiple;
+        t.y = thresholdY * multiple*multiple;
+        t.z = thresholdZ * multiple*multiple;
+
+        uprintf("tx: %d\n\r", (int)t.x);
     } else {
         t.x = 0;
         t.y = 0;
@@ -159,7 +169,7 @@ unsigned int L3G4200D_fastRegister(unsigned int reg) {
     return buffer[0];
 }
 
-struct Vector L3G4200D_readRaw() {
+struct Vector_Short L3G4200D_readRaw() {
     unsigned int data[] = {(L3G4200D_REG_OUT_X_L | (1 << 7))};
     unsigned int buffer[6];
 
@@ -174,7 +184,7 @@ struct Vector L3G4200D_readRaw() {
     return r;
 }
 
-struct Vector L3G4200D_readNormalize() {
+struct Vector_Float L3G4200D_readNormalize() {
     L3G4200D_readRaw();
 
     if (useCalibrate) {
@@ -188,9 +198,9 @@ struct Vector L3G4200D_readNormalize() {
     }
 
     if (actualThreshold > 0) {
-        if (abs(n.x) < t.x) n.x = 0;
-        if (abs(n.y) < t.y) n.y = 0;
-        if (abs(n.z) < t.z) n.z = 0;
+        if (n.x*n.x < t.x*dpsPerDigit*dpsPerDigit) n.x = 0;
+        if (n.y*n.y < t.y*dpsPerDigit*dpsPerDigit) n.y = 0;
+        if (n.z*n.z < t.z*dpsPerDigit*dpsPerDigit) n.z = 0;
     }
 
     return n;
