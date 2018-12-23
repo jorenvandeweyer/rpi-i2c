@@ -138,13 +138,14 @@ void loop_L3G4200D() {
   struct Vector raw = L3G4200D_readRaw();
   struct Vector norm = L3G4200D_readNormalize();
 
-  uprintf("Xraw = %d", raw.x);
-  uprintf(" Yraw = %d", raw.y);
-  uprintf(" Zraw = %d", raw.z);
-
-  uprintf(" Xnorm = %d", norm.x);
-  uprintf(" Ynorm = %d", norm.y);
-  uprintf(" ZNorm = %d\n\r", norm.z);
+  uprintf("G ");
+  uprintf("X: %d", raw.x);
+  uprintf("Y: %d", raw.y);
+  uprintf("Z: %d", raw.z);
+  uprintf("\n\r");
+  // uprintf(" Xnorm = %d", norm.x);
+  // uprintf(" Ynorm = %d", norm.y);
+  // uprintf(" ZNorm = %d\n\r", norm.z);
 }
 
 void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags )
@@ -176,7 +177,7 @@ void kernel_main( unsigned int r0, unsigned int r1, unsigned int atags )
 
 	while (1) {
     loop_L3G4200D();
-    delay_ms(200);
+    delay_ms(100);
 	}
 }
 

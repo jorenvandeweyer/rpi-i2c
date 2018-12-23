@@ -167,9 +167,9 @@ struct Vector L3G4200D_readRaw() {
 
     read_bytes(L3G4200D_ADDRESS, buffer, 6);
 
-    r.x = buffer[1] << 8 | buffer[0];
-    r.y = buffer[3] << 8 | buffer[2];
-    r.z = buffer[5] << 8 | buffer[4];
+    r.x = (buffer[1] << 8 | buffer[0]) & 0xFFFF;
+    r.y = (buffer[3] << 8 | buffer[2]) & 0xFFFF;
+    r.z = (buffer[5] << 8 | buffer[4]) & 0xFFFF;
 
     return r;
 }

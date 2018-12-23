@@ -62,9 +62,9 @@ typedef enum
 } l3g4200d_odrbw_t;
 
 struct Vector {
-    int x;
-    int y;
-    int z;
+    short x;
+    short y;
+    short z;
 };
 
 int L3G4200D_begin(l3g4200d_dps_t scale, l3g4200d_odrbw_t odrbw);
